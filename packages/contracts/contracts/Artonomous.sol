@@ -15,7 +15,7 @@ contract Artonomous {
 
     ArtonomousStaking public artonomousStaking;
     ArtonomousArtPieceToken public pieceToken;
-    uint public AUCTION_LENGTH = 86400; // 24 hours
+    uint public AUCTION_LENGTH = (24*60*60)/15 // 24 hours in blocks of 15 secs
     Auction currentAuction;
 
     constructor(address stakingAddr) public {
@@ -30,7 +30,7 @@ contract Artonomous {
         pieceToken.mint(this, block.number, currentGeneratorHash);
         currentAuction = Auction({
             blockNumber: block.number,
-            endTime: now + AUCTION_LENGTH
+            endTime: block.number + AUCTION_LENGTH
         });
         emit ArtonomousAuctionStarted(block.number, currentGeneratorHash);
     }
@@ -39,7 +39,7 @@ contract Artonomous {
     function claimArt() external {
         uint blockNumber = currentAuction.blockNumber;
         require(blockNumber > 0);
-        require(currentAuction.endTime < now);
+        require(currentAuction.endTime < block.number);
 
         pieceToken.transferFrom(this, msg.sender, blockNumber);
 
